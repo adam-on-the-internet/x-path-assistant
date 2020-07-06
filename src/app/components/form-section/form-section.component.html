@@ -1,0 +1,247 @@
+<section id="form-section">
+  <div class="container">
+    <div id="selection-row" class="row my-2">
+      <div class="col-md-12">
+        <div class="card bg-dark text-white">
+          <div class="card-header">
+            <h2>
+              <fa-icon [icon]="faMapSigns"></fa-icon>
+              Choose Your Path
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <ng-container
+                  [ngTemplateOutlet]="addElement"
+                  [ngTemplateOutletContext]="{ index: 0 }"
+                ></ng-container>
+              </div>
+            </div>
+            <hr />
+            <ng-container
+              *ngFor="let selector of xpathDetails.selectors; let i = index"
+            >
+              <div class="row mt-3">
+                <div class="col-md-12">
+                  <h4>Element {{ i + 1 }}</h4>
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <select
+                        [attr.id]="'placement-' + i"
+                        class="form-control"
+                        [(ngModel)]="selector.placement"
+                      >
+                        <option value="//">Any Child</option>
+                        <option value="/">Next Child</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [attr.id]="'tag-' + i"
+                        [(ngModel)]="selector.tag"
+                        placeholder="tag"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <ng-container
+                        [ngTemplateOutlet]="removeElement"
+                        [ngTemplateOutletContext]="{ index: i }"
+                      ></ng-container>
+                    </div>
+                  </div>
+                  <ng-container
+                    *ngFor="
+                      let conditional of selector.conditionals;
+                      let cindex = index
+                    "
+                  >
+                    <div class="row">
+                      <div class="col-md-12">Conditional {{ cindex + 1 }}</div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <select
+                          [attr.id]="'c-type-' + i + '-' + cindex"
+                          class="form-control"
+                          [(ngModel)]="conditional.type"
+                        >
+                          <option value="id">id</option>
+                          <option value="class">class</option>
+                          <option value="text">text</option>
+                        </select>
+                      </div>
+                      <div class="form-group col-md-4">
+                        <input
+                          type="text"
+                          class="form-control"
+                          [attr.id]="'c-match-' + i + '-' + cindex"
+                          [(ngModel)]="conditional.match"
+                          placeholder="matching text"
+                        />
+                      </div>
+                      <div class="col-md-4">
+                        <ng-container
+                          [ngTemplateOutlet]="removeConditional"
+                          [ngTemplateOutletContext]="{
+                            index: i,
+                            cindex: cindex
+                          }"
+                        ></ng-container>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <ng-container
+                        [ngTemplateOutlet]="addConditional"
+                        [ngTemplateOutletContext]="{ index: i }"
+                      ></ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <ng-container
+                    [ngTemplateOutlet]="addElement"
+                    [ngTemplateOutletContext]="{ index: i + 1 }"
+                  ></ng-container>
+                </div>
+              </div>
+              <hr />
+            </ng-container>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Index of Result</span>
+                  </div>
+                  <input
+                    type="string"
+                    class="form-control"
+                    [(ngModel)]="xpathDetails.index"
+                  />
+                </div>
+              </div>
+            </div>
+            <div id="errors">
+              <div class="row" *ngIf="!validTags">
+                <div class="col-md-12">
+                  <p>
+                    <fa-icon
+                      [icon]="faExclamationTriangle"
+                      style="color: red"
+                    ></fa-icon>
+                    You must provide a tag for each element.
+                  </p>
+                </div>
+              </div>
+              <div class="row" *ngIf="!validConditionals">
+                <div class="col-md-12">
+                  <p>
+                    <fa-icon
+                      [icon]="faExclamationTriangle"
+                      style="color: red"
+                    ></fa-icon>
+                    You must provide a match for each conditional.
+                  </p>
+                </div>
+              </div>
+              <div class="row" *ngIf="!validIndex">
+                <div class="col-md-12">
+                  <p>
+                    <fa-icon
+                      [icon]="faExclamationTriangle"
+                      style="color: red"
+                    ></fa-icon>
+                    For index, provide a positive integer or nothing.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-12">
+                <button
+                  (click)="generateXpath()"
+                  class="btn btn-success btn-block"
+                  [disabled]="!validIndex || !validTags || !validConditionals"
+                >
+                  Generate XPath
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="results-row" class="row" *ngIf="xpathResult">
+      <div class="col-md-12">
+        <div class="card border-success">
+          <div class="card-header bg-success text-white">
+            <h2>
+              <fa-icon [icon]="faMapMarkedAlt"></fa-icon>
+              Results
+            </h2>
+          </div>
+          <div class="card-body">
+            <p class="lead">
+              {{ xpathResult }}
+            </p>
+            <p *ngIf="invalidIds">
+              <fa-icon
+                [icon]="faExclamationTriangle"
+                style="color: red"
+              ></fa-icon>
+              A selector in this xpath has multiple ids, so it will not work
+              with valid HTML.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #addElement let-index="index">
+  <button (click)="addRow(index)" class="btn btn-success btn-block my-2">
+    <fa-icon [icon]="faPlusSquare"></fa-icon>
+    Add Element
+  </button>
+</ng-template>
+
+<ng-template #removeElement let-index="index">
+  <button
+    (click)="removeRow(index)"
+    class="btn btn-danger btn-block"
+    [disabled]="xpathDetails.selectors.length === 1"
+  >
+    <fa-icon [icon]="faMinusSquare"></fa-icon>
+    Remove Element
+  </button>
+</ng-template>
+
+<ng-template #addConditional let-index="index">
+  <button
+    (click)="addConditionalToElement(index)"
+    class="btn btn-info btn-block my-2"
+  >
+    <fa-icon [icon]="faPlusSquare"></fa-icon>
+    Add Conditional
+  </button>
+  <p *ngIf="xpathDetails.selectors[index].conditionals.length === 0">
+    This element has no conditionals.
+  </p>
+</ng-template>
+
+<ng-template #removeConditional let-index="index" let-cindex="cindex">
+  <button
+    (click)="removeConditionalFromElement(index, cindex)"
+    class="btn btn-warning btn-block"
+  >
+    <fa-icon [icon]="faMinusSquare"></fa-icon>
+    Remove Conditional
+  </button>
+</ng-template>
